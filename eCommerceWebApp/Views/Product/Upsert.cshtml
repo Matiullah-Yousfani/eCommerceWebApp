@@ -1,0 +1,129 @@
+﻿@model ProductVM
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(Model.Product.Product_Id == 0 ? "Create Product" : "Update Product")</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .form-heading {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            margin-bottom: 15px;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+        }
+
+        .btn-submit, .btn-back {
+            margin-right: 10px;
+        }
+
+        .btn-back {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+            .btn-back:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h3 class="form-heading">
+            @(Model.Product.Product_Id == 0 ? "Create Product" : "Update Product")
+        </h3>
+
+        <form method="post" enctype="multipart/form-data">
+            <input asp-for="Product.Product_Id" hidden />
+
+            <div class="form-group">
+                <label asp-for="Product.Product_Name" class="form-label">Product Name</label>
+                <input type="text" class="form-control" asp-for="Product.Product_Name" placeholder="Enter Product Name" />
+                <span asp-validation-for="Product.Product_Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.Description" class="form-label">Description</label>
+                <textarea class="form-control" asp-for="Product.Description" placeholder="Enter Description"></textarea>
+                <span asp-validation-for="Product.Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.StockQuantity" class="form-label">Stock Quantity</label>
+                <input type="number" class="form-control" asp-for="Product.StockQuantity" placeholder="Enter Stock Quantity" />
+                <span asp-validation-for="Product.StockQuantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.Price" class="form-label">Price</label>
+                <input type="text" step="0.01" class="form-control" asp-for="Product.Price" placeholder="Enter Price" />
+                <span asp-validation-for="Product.Price" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.SKU" class="form-label">SKU</label>
+                <input type="text" class="form-control" asp-for="Product.SKU" placeholder="Enter SKU" />
+                <span asp-validation-for="Product.SKU" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.ImageUrl" class="form-label">Image URL</label>
+                <input type="file" name="file" class="form-control" asp-for="Product.ImageUrl" />
+                <span asp-validation-for="Product.ImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <select asp-for="@Model.Product.CategoryId" class="form-control" asp-items="@Model.CategoryList">
+                    <option disabled selected>-- Select Category --</option>
+                </select>
+                <label asp-for="Product.CategoryId" class="form-label"></label>
+                <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button class="btn btn-outline-primary btn-submit" type="submit">
+                    @(Model.Product.Product_Id == 0 ? "Create" : "Update")
+                </button>
+                <a class="btn btn-back" asp-controller="Product" asp-action="Index">Back to List</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
