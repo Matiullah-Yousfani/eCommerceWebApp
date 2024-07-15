@@ -1,4 +1,5 @@
-﻿using eCommerceWebApp.Data;
+﻿using ECommerce.DataAccess.Repository.IRepository;
+using eCommerceWebApp.Data;
 using eCommerceWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -7,14 +8,14 @@ namespace eCommerceWebApp.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _db;
-        public CategoryController(ApplicationDbContext db)
+        private readonly IUnitOfWork _db;
+        public CategoryController(IUnitOfWork db)
         {
             _db = db;
         }
         public IActionResult Index()
         {
-            List<Category> categories = _db.categories.ToList();
+            List<Category> categories = _db.CategoryRepository.GetAll().ToList();
             return View(categories);
         }
 
@@ -29,7 +30,7 @@ namespace eCommerceWebApp.Controllers
             else
             {
                 //update
-                Category? categoryID = _db.categories.FirstOrDefault(u => u.Category_Id == id);
+                Category? categoryID = _db.CategoryRepository.Get(u => u.Category_Id == id);
                 return View(categoryID);
             }
         }
@@ -40,13 +41,13 @@ namespace eCommerceWebApp.Controllers
             {
                 if (c.Category_Id == 0)
                 {
-                    _db.categories.Add(c);
+                    _db.CategoryRepository.Add(c);
                 }
                 else
                 {
-                    _db.categories.Update(c);
+                    _db.CategoryRepository.Update(c);
                 }
-                _db.SaveChanges();
+                _db.save();
                 return RedirectToAction("Index");
             }
             else
@@ -62,7 +63,7 @@ namespace eCommerceWebApp.Controllers
         {
             if (id != null)
             {
-                var objFromDb = _db.categories.FirstOrDefault(u => u.Category_Id == id);
+                var objFromDb = _db.CategoryRepository.Get(u => u.Category_Id == id);
                 return View(objFromDb);
             }
             return View();
@@ -71,9 +72,9 @@ namespace eCommerceWebApp.Controllers
         [HttpPost,ActionName("Delete")]
         public IActionResult DeletePost(int? id)
         {
-                var obj = _db.categories.FirstOrDefault(u=>u.Category_Id == id);
-                _db.categories.Remove(obj);
-                _db.SaveChanges();
+                var obj = _db.CategoryRepository.Get(u=>u.Category_Id == id);
+                _db.CategoryRepository.Remove(obj);
+                _db.save();
             return RedirectToAction("Index");
             
         }

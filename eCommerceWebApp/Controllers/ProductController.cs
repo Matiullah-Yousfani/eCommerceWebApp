@@ -1,4 +1,5 @@
-﻿using eCommerceWebApp.Data;
+﻿using ECommerce.DataAccess.Repository.IRepository;
+using eCommerceWebApp.Data;
 using eCommerceWebApp.Models;
 using eCommerceWebApp.ViewModels;
 using Microsoft.AspNetCore.Hosting;
@@ -12,16 +13,16 @@ namespace eCommerceWebApp.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _db;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
+        public ProductController(IUnitOfWork db, IWebHostEnvironment webHostEnvironment)
         {
             _db = db;
             _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
-            List<Product> products = _db.products.Include(p => p.Category).ToList();
+            List<Product> products = _db.ProductRepository.GetAll(includeProperties:"Category").ToList();
             return View(products);
         }
 
@@ -29,8 +30,8 @@ namespace eCommerceWebApp.Controllers
         {
             ProductVM productvm = new ProductVM()
             {
-                CategoryList = _db.categories.Select(
-                    u=> new SelectListItem
+                CategoryList = _db.CategoryRepository.GetAll().Select(
+                    u => new SelectListItem
                     {
                         Text = u.CategoryName,
                         Value = u.Category_Id.ToString()
@@ -47,12 +48,12 @@ namespace eCommerceWebApp.Controllers
             else
             {
                 //update
-                productvm.Product = _db.products.FirstOrDefault(u => u.Product_Id == id);
+                productvm.Product = _db.ProductRepository.Get(u => u.Product_Id == id);
                 return View(productvm);
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM p,IFormFile? file)
+        public IActionResult Upsert(ProductVM p, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
@@ -82,21 +83,21 @@ namespace eCommerceWebApp.Controllers
                 if (p.Product.Product_Id == 0)
                 {
                     p.Product.CreatedDate = DateTime.Now;
-                    _db.products.Add(p.Product);
+                    _db.ProductRepository.Add(p.Product);
                 }
                 else
                 {
-                   
+
                     p.Product.UpdatedDate = DateTime.Now;
-                    _db.products.Update(p.Product);
-                    
+                    _db.ProductRepository.Update(p.Product);
+
                 }
-                _db.SaveChanges();
+                _db.save();
                 return RedirectToAction("Index");
             }
             else
             {
-                p.CategoryList = _db.categories.Select(
+                p.CategoryList = _db.CategoryRepository.GetAll().Select(
                u => new SelectListItem
                {
                    Text = u.CategoryName,
@@ -105,29 +106,33 @@ namespace eCommerceWebApp.Controllers
                ).ToList();
                 return View(p);
             }
-            
+
         }
 
-       
 
         public IActionResult Delete(int? id)
         {
             if (id != null)
             {
-                var objFromDb = _db.products.FirstOrDefault(u => u.Product_Id == id);
+                var objFromDb = _db.ProductRepository.Get(u => u.Product_Id == id);
                 return View(objFromDb);
             }
             return View();
         }
 
-        [HttpPost,ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         public IActionResult DeletePost(int? id)
         {
-                var obj = _db.products.FirstOrDefault(u=>u.Product_Id == id);
-                _db.products.Remove(obj);
-                _db.SaveChanges();
+            var obj = _db.ProductRepository.Get(u => u.Product_Id == id);
+            var oldimagepath = Path.Combine(_webHostEnvironment.WebRootPath, obj.ImageUrl.TrimStart('\\'));
+            if (System.IO.File.Exists(oldimagepath))
+            {
+                System.IO.File.Delete(oldimagepath);
+            }
+            _db.ProductRepository.Remove(obj);
+            _db.save();
             return RedirectToAction("Index");
-            
+
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using eCommerceWebApp.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace eCommerceWebApp.Data
 {
     public class ApplicationDbContext:DbContext
